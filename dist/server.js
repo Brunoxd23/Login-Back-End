@@ -7,16 +7,18 @@ var express_1 = __importDefault(require("express"));
 var cors_1 = __importDefault(require("cors"));
 var routes_1 = require("./routes");
 var dotenv_1 = __importDefault(require("dotenv"));
-// Carrega variáveis de ambiente do arquivo .env
-dotenv_1["default"].config();
+// Carrega variáveis de ambiente do arquivo .env apenas em ambiente de desenvolvimento
+if (process.env.NODE_ENV !== "production") {
+    dotenv_1["default"].config();
+}
 var app = (0, express_1["default"])();
-// Configura o middleware CORS para permitir solicitações de diferentes origens
 app.use((0, cors_1["default"])());
-// Configura o middleware para analisar o corpo das requisições em JSON
 app.use(express_1["default"].json());
-// Usa o roteador importado para gerenciar rotas
 app.use(routes_1.router);
-// Obtém a porta a partir das variáveis de ambiente ou usa 3000 por padrão
+// Usa a porta fornecida pelo ambiente ou 3000 como fallback
 var PORT = process.env.PORT || 3000;
-// Inicia o servidor e escuta na porta especificada
 app.listen(PORT, function () { return console.log("Server is running on port ".concat(PORT)); });
+// Adicione um endpoint de teste
+app.get("/", function (req, res) {
+    res.json({ message: "API is working!" });
+});
