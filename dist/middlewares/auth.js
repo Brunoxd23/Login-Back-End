@@ -1,16 +1,16 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+exports.__esModule = true;
 exports.authMiddleware = void 0;
-const jsonwebtoken_1 = require("jsonwebtoken");
+var jsonwebtoken_1 = require("jsonwebtoken");
 function authMiddleware(req, res, next) {
-    const { authorization } = req.headers;
+    var authorization = req.headers.authorization;
     if (!authorization) {
         return res.status(401).json({ error: "Token not provided" });
     }
-    const [, token] = authorization.split(" ");
+    var _a = authorization.split(" "), token = _a[1];
     try {
-        const decoded = (0, jsonwebtoken_1.verify)(token, "secret");
-        const { id } = decoded;
+        var decoded = (0, jsonwebtoken_1.verify)(token, "secret");
+        var id = decoded.id;
         req.userId = id;
         next();
     }
