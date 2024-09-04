@@ -8,7 +8,9 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  origin:
+    process.env.CORS_ORIGIN ||
+    "postgresql://postgres:WTqMkqwYuTKFLCoezKkKJBEXQxOQTkQS@meticulous-empathy.railway.internal:5432/railway",
   optionsSuccessStatus: 200
 };
 
@@ -18,7 +20,7 @@ app.use("/api", router);
 
 // Apenas para desenvolvimento local
 if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 5432;
   app.listen(PORT, () =>
     console.log(`Server is running on http://localhost:${PORT}`)
   );
