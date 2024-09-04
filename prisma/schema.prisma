@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -14,15 +14,13 @@ model User {
   password String
 }
 
-model agendamento {
-  id       Int    @id @default(autoincrement())
-  data     DateTime
-  horario  DateTime
-  curso    String
-  sala     String
+model Agendamento {
+  id         Int      @id @default(autoincrement())
+  data       DateTime
+  horario    DateTime
+  curso      String
+  sala       String
   disciplina String
-  tipoProva String
-  suporte String
+  tipoProva  String
+  suporte    String
 }
-
-

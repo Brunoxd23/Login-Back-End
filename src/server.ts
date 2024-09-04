@@ -3,18 +3,26 @@ import cors from "cors";
 import { router } from "./routes";
 import dotenv from "dotenv";
 
-// Carregar variáveis de ambiente do arquivo .env
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(router);
+app.use("/api", router);
 
-// Obter a porta a partir das variáveis de ambiente ou usar 3333 por padrão
-const PORT = process.env.PORT || 3000;
+// Apenas para desenvolvimento local
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () =>
+    console.log(`Server is running on http://localhost:${PORT}`)
+  );
+}
 
-app.listen(PORT, () =>
-  console.log(`Server is running on http://localhost:${PORT}`)
-);
+// Exportar para uso serverless
+export default app;
