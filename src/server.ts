@@ -10,7 +10,7 @@ const app = express();
 const corsOptions = {
   origin:
     process.env.CORS_ORIGIN ||
-    "postgresql://User_owner:cahbDnUXJu32@ep-still-recipe-a51uvj8u.us-east-2.aws.neon.tech/User?sslmode=require",
+    "postgresql://neondb_owner:wl8VgFxIC6kL@ep-shiny-flower-a5q9ke6z.us-east-2.aws.neon.tech/neondb?sslmode=require",
   optionsSuccessStatus: 200
 };
 
