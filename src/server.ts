@@ -1,22 +1,20 @@
 import express from 'express';
 import cors from 'cors';
-import { router } from './routes';
 import dotenv from 'dotenv';
+import { router } from './routes';
 
 dotenv.config();
 
 const app = express();
 
-// Defina as opções de CORS para permitir o frontend acessar o backend
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Usa a variável de ambiente CORS_ORIGIN
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    allowedHeaders: "Content-Type, Authorization",
-    optionsSuccessStatus: 200
+  origin: process.env.CORS_ORIGIN || 'https://cronograma-provas-morato-frontend.vercel.app/', // Adicione a URL do seu frontend
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // Se estiver usando cookies
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// Aplique o middleware de CORS
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // Ative o middleware de CORS
 
 app.use(express.json());
 app.use("/api", router);
