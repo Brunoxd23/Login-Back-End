@@ -9,9 +9,9 @@ function authMiddleware(req, res, next) {
     }
     const [, token] = authorization.split(" ");
     try {
-        const decoded = (0, jsonwebtoken_1.verify)(token, "secret");
+        const decoded = (0, jsonwebtoken_1.verify)(token, process.env.JWT_SECRET || "secret");
         const { id } = decoded;
-        req.userId = id;
+        req.userId = id; // userId é uma string, de acordo com a declaração nos tipos
         next();
     }
     catch (error) {

@@ -1,3 +1,4 @@
+// src/middlewares/auth.ts
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 
@@ -21,10 +22,10 @@ export function authMiddleware(
   const [, token] = authorization.split(" ");
 
   try {
-    const decoded = verify(token, "secret");
+    const decoded = verify(token, process.env.JWT_SECRET || "secret");
     const { id } = decoded as TokenPayload;
 
-    req.userId = id;
+    req.userId = id; // userId é uma string, de acordo com a declaração nos tipos
     next();
   } catch (error) {
     return res.status(401).json({ error: "Token invalid" });
