@@ -10,7 +10,7 @@ const app = express();
 
 // Configurações do CORS
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "https://cronograma-provas-morato-frontend-leobf9xxx.vercel.app/", // Permite acesso da URL do frontend
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Permite acesso da URL do frontend
     optionsSuccessStatus: 200
 };
 
