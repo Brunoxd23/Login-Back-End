@@ -3,17 +3,28 @@ import cors from 'cors';
 import { router } from './routes';
 import dotenv from 'dotenv';
 
+// Carregar variáveis de ambiente
 dotenv.config();
 
 const app = express();
 
+// Configurações do CORS
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || "https://cronograma-provas-morato-frontend-leobf9xxx.vercel.app/", // Permite acesso da URL do frontend
+    optionsSuccessStatus: 200
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
-app.use(router);
 
+// Roteamento
+app.use("/api", router);
 
-app.listen(3000, () =>
-  console.log("Server is running in http://localhost:3000")
+// Configuração da porta
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () =>
+  console.log(`Server is running on http://localhost:${PORT}`)
 );
 
+// Exportar para uso em ambientes serverless
+export default app;

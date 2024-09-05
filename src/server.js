@@ -10,7 +10,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN || "https://cronograma-provas-morato-frontend-leobf9xxx.vercel.app/",
     optionsSuccessStatus: 200
 };
 app.use((0, cors_1.default)(corsOptions));
