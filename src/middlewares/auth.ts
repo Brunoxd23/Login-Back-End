@@ -1,33 +1,29 @@
-// src/middlewares/auth.ts
-import { NextFunction, Request, Response } from "express";
-import { verify } from "jsonwebtoken";
+import { Router } from 'express';
+import { hash, compare } from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
-type TokenPayload = {
-  id: string;
-  iat: number;
-  exp: number;
-};
+const router = Router();
+const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Substitua por uma chave secreta segura
 
-export function authMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const { authorization } = req.headers;
-
-  if (!authorization) {
-    return res.status(401).json({ error: "Token not provided" });
-  }
-
-  const [, token] = authorization.split(" ");
+// Endpoint de login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
   try {
-    const decoded = verify(token, process.env.JWT_SECRET || "secret");
-    const { id } = decoded as TokenPayload;
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    req.userId = id; // userId é uma string, de acordo com a declaração nos tipos
-    next();
+    if (!user || !(await compare(password, user.password))) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
+
+    return res.json({ user, token });
   } catch (error) {
-    return res.status(401).json({ error: "Token invalid" });
+    return res.status(500).json({ error: 'Failed to authenticate' });
   }
-}
+});
+
+export default router;
