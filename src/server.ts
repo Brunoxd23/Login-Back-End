@@ -8,9 +8,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin:
-    process.env.CORS_ORIGIN ||
-    "postgresql://neondb_owner:wl8VgFxIC6kL@ep-shiny-flower-a5q9ke6z.us-east-2.aws.neon.tech/neondb?sslmode=require",
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
   optionsSuccessStatus: 200
 };
 
