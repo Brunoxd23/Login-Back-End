@@ -1,13 +1,23 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.router = void 0;
-const express_1 = require("express");
-const UserController_1 = require("./controller/UserController");
-const AuthController_1 = require("./controller/AuthController");
-const auth_1 = require("./middlewares/auth");
-const usercontroller = new UserController_1.UserController();
-const authcontroller = new AuthController_1.AuthController();
-exports.router = (0, express_1.Router)();
-exports.router.post("/auth", authcontroller.authenticate);
-exports.router.post("/create", usercontroller.store);
-exports.router.get("/users", auth_1.authMiddleware, usercontroller.index);
+import express from 'express';
+import db from './db'; // Importa o arquivo db.js para usar as consultas
+
+const router = express.Router();
+
+router.post('/auth', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const result = await db.query('SELECT * FROM users WHERE email = $1 AND password = $2', [email, password]);
+    
+    if (result.rows.length > 0) {
+      res.status(200).json({ message: 'Login bem-sucedido' });
+    } else {
+      res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+  } catch (error) {
+    console.error('Erro na autenticação:', error);
+    res.status(500).json({ message: 'Erro no servidor' });
+  }
+});
+
+export { router };
