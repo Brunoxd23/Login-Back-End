@@ -8,9 +8,8 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  process.env.CORS_ORIGIN,
-  'https://cronograma-provas-morato-frontend.vercel.app'
-  // Adicione aqui outras origens permitidas, se necessário
+  'https://cronograma-provas-morato-frontend.vercel.app',
+  'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app',
 ];
 
 const corsOptions: cors.CorsOptions = {
@@ -22,15 +21,15 @@ const corsOptions: cors.CorsOptions = {
     }
   },
   optionsSuccessStatus: 200,
-  credentials: true
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use("/api", router);
+app.use('/api', router);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => 
+app.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );
 
