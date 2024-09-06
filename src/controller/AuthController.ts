@@ -1,7 +1,10 @@
-import { prisma } from "../utils/prisma";
-import { compare } from "bcryptjs";
-import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import { PrismaClient } from '@prisma/client';
+import { compare } from 'bcryptjs';
+import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+
+const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Substitua por uma chave secreta segura
 
 export class AuthController {
   async authenticate(req: Request, res: Response) {
@@ -11,29 +14,24 @@ export class AuthController {
       const user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) {
-        return res.status(400).json({ error: "User not found" });
+        return res.status(400).json({ error: 'User not found' });
       }
 
       const passwordMatch = await compare(password, user.password);
 
       if (!passwordMatch) {
-        return res.status(400).json({ error: "Invalid credentials" });
+        return res.status(400).json({ error: 'Invalid credentials' });
       }
 
-      // Verificar se a variável JWT_SECRET está definida
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) {
-        return res.status(500).json({ error: "JWT secret not configured" });
+      if (!JWT_SECRET) {
+        return res.status(500).json({ error: 'JWT secret not configured' });
       }
 
-      // Gerar o token JWT
-      const token = jwt.sign({ userId: user.id }, jwtSecret, {
-        expiresIn: "1d", // Token expira em 1 dia
-      });
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1d' });
 
       return res.json({ user, token });
     } catch (error) {
-      return res.status(500).json({ error: "Failed to authenticate" });
+      return res.status(500).json({ error: 'Failed to authenticate' });
     }
   }
 }
