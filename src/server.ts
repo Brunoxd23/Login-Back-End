@@ -9,9 +9,7 @@ const app = express();
 
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
-  'https://login-back-end.vercel.app/',
-  'https://cronograma-provas-morato-frontend.vercel.app',
-  'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app'
+  'https://cronograma-provas-morato-frontend.vercel.app'
   // Adicione aqui outras origens permitidas, se necessário
 ];
 
