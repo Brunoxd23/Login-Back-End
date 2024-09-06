@@ -1,25 +1,35 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { router } from './routes'; // Supondo que você tenha um arquivo separado para as rotas
+
+dotenv.config();
+
+const app = express();
+
+// Lista de origens permitidas
+const allowedOrigins = [
+  process.env.CORS_ORIGIN,
+  'https://cronograma-provas-morato-frontend.vercel.app' // Substitua pelo seu frontend hospedado na Vercel
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: function (origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  optionsSuccessStatus: 200,
+  credentials: true
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const routes_1 = require("./routes");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const app = (0, express_1.default)();
-const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "https://cronograma-provas-morato-frontend-leobf9xxx.vercel.app/",
-    optionsSuccessStatus: 200
-};
-app.use((0, cors_1.default)(corsOptions));
-app.use(express_1.default.json());
-app.use("/api", routes_1.router);
-// Apenas para desenvolvimento local
-if (process.env.NODE_ENV !== "production") {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
-}
-// Exportar para uso serverless
-exports.default = app;
+
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use("/api", router); // Supondo que você tenha rotas definidas no arquivo 'routes'
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+
+export default app;
