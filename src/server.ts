@@ -9,7 +9,8 @@ const app = express();
 
 const allowedOrigins = [
   process.env.CORS_ORIGIN,
-  "https://cronograma-provas-morato-frontend.vercel.app"
+  "https://login-back-end.vercel.app/",
+  "https://login-back-612ma7gek-brunos-projects-e6b83a53.vercel.app"
 ];
 
 const corsOptions: cors.CorsOptions = {
