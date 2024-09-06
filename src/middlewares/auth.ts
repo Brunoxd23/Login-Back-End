@@ -2,31 +2,10 @@ import { Router } from 'express';
 import { hash, compare } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import cors from 'cors';
 
 const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Substitua por uma chave secreta segura
-
-// Configuração CORS
-const allowedOrigins = [
-  'https://cronograma-provas-morato-frontend.vercel.app',
-  'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app',
-  // Adicione aqui outras origens permitidas, se necessário
-];
-
-router.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 
 // Endpoint de login
 router.post('/login', async (req, res) => {
