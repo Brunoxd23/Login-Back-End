@@ -7,34 +7,22 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.CORS_ORIGIN || "http://localhost:3000",
-  "https://login-back-end.vercel.app/",
-  "https://login-back-612ma7gek-brunos-projects-e6b83a53.vercel.app"
-];
-
-const corsOptions: cors.CorsOptions = {
-  origin: function (
-    origin: string | undefined,
-    callback: (error: Error | null, allow?: boolean) => void
-  ) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  optionsSuccessStatus: 200,
-  credentials: true
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/api", router);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`Server is running on http://localhost:${PORT}`)
-);
+// Apenas para desenvolvimento local
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () =>
+    console.log(`Server is running on http://localhost:${PORT}`)
+  );
+}
 
+// Exportar para uso serverless
 export default app;
