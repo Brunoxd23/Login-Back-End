@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  process.env.CORS_ORIGIN,
+  process.env.CORS_ORIGIN || "http://localhost:3000",
   "https://login-back-end.vercel.app/",
   "https://login-back-612ma7gek-brunos-projects-e6b83a53.vercel.app"
 ];
