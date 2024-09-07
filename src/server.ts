@@ -7,16 +7,20 @@ dotenv.config();
 
 const app = express();
 
+// Configuração do CORS com base na variável de ambiente
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000", // Permite acesso da URL do frontend
-    optionsSuccessStatus: 200
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  optionsSuccessStatus: 200
 };
 
+// Aplicar middleware CORS e JSON
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use("/api", router);
+app.use('/api', router);
 
+// Configuração da porta a partir da variável de ambiente
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () =>
   console.log(`Server is running on http://localhost:${PORT}`)
 );
