@@ -6,7 +6,11 @@ import cors from 'cors';
 
 const router = Router();
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // Substitua por uma chave secreta segura
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET não está definido. Configure esta variável de ambiente.');
+}
 
 // Configuração CORS
 const allowedOrigins = [
