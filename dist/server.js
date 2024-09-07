@@ -9,7 +9,17 @@ const routes_1 = require("./routes");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    optionsSuccessStatus: 200
+};
+app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
-app.use(routes_1.router);
-app.listen(3000, () => console.log("Server is running in http://localhost:3000"));
+app.use("/api", routes_1.router);
+// Apenas para desenvolvimento local
+if (process.env.NODE_ENV !== "production") {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+}
+// Exportar para uso serverless
+exports.default = app;
