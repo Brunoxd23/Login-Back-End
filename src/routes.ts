@@ -3,11 +3,11 @@ import { UserController } from "./controller/UserController";
 import { AuthController } from "./controller/AuthController";
 import authMiddleware from "./middlewares/auth";
 
-const usercontroller = new UserController();
-const authcontroller = new AuthController();
+const userController = new UserController();
+const authController = new AuthController();
 
 export const router = Router();
 
-router.post("/auth", authcontroller.authenticate);
-router.post("/create", usercontroller.store);
-router.get("/users", authMiddleware, usercontroller.index);
+router.post("/auth", (req, res) => authController.authenticate(req, res));
+router.post("/create", (req, res) => userController.store(req, res));
+router.get("/users", authMiddleware, (req, res) => userController.index(req, res));

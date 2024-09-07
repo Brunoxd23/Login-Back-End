@@ -8,31 +8,35 @@ export class AuthController {
     const { email, password } = req.body;
 
     try {
+      console.log(`Tentativa de autenticação para o email: ${email}`);
       const user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) {
+        console.log(`Usuário não encontrado para o email: ${email}`);
         return res.status(400).json({ error: "User not found" });
       }
 
       const passwordMatch = await compare(password, user.password);
 
       if (!passwordMatch) {
+        console.log(`Senha inválida para o usuário: ${email}`);
         return res.status(400).json({ error: "Invalid credentials" });
       }
 
-      // Verificar se a variável JWT_SECRET está definida
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
+        console.error("JWT secret não configurado");
         return res.status(500).json({ error: "JWT secret not configured" });
       }
 
-      // Gerar o token JWT
       const token = jwt.sign({ userId: user.id }, jwtSecret, {
-        expiresIn: "1d", // Token expira em 1 dia
+        expiresIn: "1d",
       });
 
-      return res.json({ user, token });
+      console.log(`Autenticação bem-sucedida para o usuário: ${email}`);
+      return res.json({ user: { id: user.id, email: user.email }, token });
     } catch (error) {
+      console.error("Erro durante a autenticação:", error);
       return res.status(500).json({ error: "Failed to authenticate" });
     }
   }

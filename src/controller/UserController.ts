@@ -3,11 +3,20 @@ import { hash } from "bcryptjs";
 import { Request, Response } from "express";
 
 export class UserController {
-  async index(req: Request, res: Response) {
+  async index(_req: Request, res: Response) {
     try {
-      const users = await prisma.user.findMany();
+      console.log("Buscando todos os usuários");
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      });
+      console.log(`${users.length} usuários encontrados`);
       return res.json(users);
     } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
       return res.status(500).json({ error: 'Failed to fetch users' });
     }
   }
@@ -16,9 +25,12 @@ export class UserController {
     const { name, email, password } = req.body;
 
     try {
+      console.log(`Tentativa de criação de usuário para o email: ${email}`);
+      
       const userExists = await prisma.user.findUnique({ where: { email } });
 
       if (userExists) {
+        console.log(`Usuário já existe para o email: ${email}`);
         return res.status(400).json({ error: "User already exists" });
       }
 
@@ -30,9 +42,17 @@ export class UserController {
           email,
           password: hash_password,
         },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
       });
+
+      console.log(`Usuário criado com sucesso: ${user.id}`);
       return res.status(201).json({ user });
     } catch (error) {
+      console.error("Erro ao criar usuário:", error);
       return res.status(500).json({ error: 'Failed to create user' });
     }
   }
