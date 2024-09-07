@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "https://login-back-end.vercel.app/", // Permite acesso da URL do frontend
+    origin: process.env.CORS_ORIGIN || "https://login-back-end.vercel.app/api", // Permite acesso da URL do frontend
     optionsSuccessStatus: 200
 };
 
