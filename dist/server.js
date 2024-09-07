@@ -10,7 +10,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN || "https://cronograma-provas-morato-frontend.vercel.app/",
     optionsSuccessStatus: 200
 };
 app.use((0, cors_1.default)(corsOptions));
@@ -21,5 +21,5 @@ if (process.env.NODE_ENV !== "production") {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
 }
-// Exportar para uso serverless
+// Exportar o manipulador do Express para uso serverless
 exports.default = app;

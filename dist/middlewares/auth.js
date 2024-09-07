@@ -10,7 +10,10 @@ const client_1 = require("@prisma/client");
 const cors_1 = __importDefault(require("cors"));
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // Substitua por uma chave secreta segura
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET não está definido. Configure esta variável de ambiente.');
+}
 // Configuração CORS
 const allowedOrigins = [
     "https://cronograma-provas-morato-frontend.vercel.app",
