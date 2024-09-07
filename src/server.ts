@@ -38,9 +38,9 @@ app.use((req, _res, next) => {
 app.use(router);
 
 // Rota de teste
-app.get('/', (req, res) => {
-  res.json({ message: 'Backend is running' });
-});
+app.get('/', (_req, res) => {
+    res.json({ message: 'Backend is running' });
+  });
 
 const PORT = process.env.PORT || 3000;
 
