@@ -28,7 +28,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Middleware para logs
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log(`${req.method} ${req.path}`);
   console.log('Origin:', req.headers.origin);
   console.log('Headers:', req.headers);
