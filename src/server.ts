@@ -7,25 +7,35 @@ dotenv.config();
 
 const app = express();
 
-// Configuração do CORS
-const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? 'https://cronograma-provas-morato-frontend.vercel.app' // URL do seu frontend em produção
-    : process.env.CORS_ORIGIN || 'http://localhost:3000',
+const allowedOrigins = [
+  'https://cronograma-provas-morato-frontend.vercel.app',
+  'http://localhost:3000'
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(router);
 
-// Middleware para logging
+// Middleware para logs
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
+  console.log('Origin:', req.headers.origin);
   console.log('Headers:', req.headers);
   next();
 });
+
+app.use(router);
 
 // Rota de teste
 app.get('/', (req, res) => {
