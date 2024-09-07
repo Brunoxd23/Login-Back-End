@@ -9,12 +9,13 @@ const app = express();
 
 const allowedOrigins = [
   'https://cronograma-provas-morato-frontend.vercel.app',
+  'https://cronograma-provas-morato-frontend-aa56cstb7.vercel.app',
   'http://localhost:3000'
 ];
 
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
