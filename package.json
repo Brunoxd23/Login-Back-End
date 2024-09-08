@@ -7,9 +7,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
-    "build": "tsc",
+    "build": "tsc -p src/tsconfig.json",
     "start": "node dist/server.js",
+    "dev": "ts-node src/server.ts",
     "vercel-build": "npx prisma migrate deploy"
   },
   "keywords": [],
