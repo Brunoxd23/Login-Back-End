@@ -1,35 +1,59 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
-import authRoutes from './middlewares/auth';
+import dotenv from 'dotenv';
+import { router } from './routes';
+import { errorHandler } from './middlewares/errorHandle';
+
+dotenv.config();
 
 const app = express();
 
-const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+const allowedOrigins = [
+  'https://cronograma-provas-morato-frontend.vercel.app',
+  'https://cronograma-provas-morato-frontend-aa56cstb7.vercel.app',
+  'http://localhost:3000'
+];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // Permite chamadas sem origem (ex. Postman)
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+const corsOptions: cors.CorsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    console.log('Requisição CORS recebida de origem:', origin);
+    if (!origin || allowedOrigins.includes(origin)) {
+      console.log('Origem permitida:', origin);
+      callback(null, true);
     } else {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+      console.log('Origem não permitida:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
-// Rotas
-app.use('/api/auth', authRoutes); // Certifique-se de que a rota está correta
+app.use(cors(corsOptions));
+app.use(express.json());
 
-// Rota de teste para verificar se o servidor está funcionando
-app.get('/', (req: Request, res: Response) => {
-  res.send('Servidor funcionando!');
+// Middleware para logs
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
+  next();
 });
 
-// Tratamento de erros
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).send('Algo deu errado!');
+app.use('/api', router);
+
+// Rota de teste
+app.get('/', (req, res) => {
+  res.json({ message: 'Backend is running' });
 });
+
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
