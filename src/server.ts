@@ -1,26 +1,20 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
 import authRoutes from './middlewares/auth';
 
 const app = express();
-const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json()); // Para analisar JSON no corpo das requisições
-app.use(express.urlencoded({ extended: true })); // Para analisar dados URL-encoded
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+
 app.use(cors({
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      'https://cronograma-provas-morato-frontend.vercel.app',
-      'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app',
-    ];
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('The CORS policy does not allow access from the specified Origin.'), false);
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // Permite chamadas sem origem (ex. Postman)
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
-    return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -38,9 +32,4 @@ app.get('/', (req: Request, res: Response) => {
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send('Algo deu errado!');
-});
-
-// Inicialização do servidor
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
 });
