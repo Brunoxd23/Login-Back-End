@@ -1,59 +1,40 @@
-import { prisma } from "../utils/prisma";
-import { hash } from "bcryptjs";
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export class UserController {
-  async index(_req: Request, res: Response) {
-    try {
-      console.log("Buscando todos os usuários");
-      const users = await prisma.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        }
-      });
-      console.log(`${users.length} usuários encontrados`);
-      return res.json(users);
-    } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-      return res.status(500).json({ error: 'Failed to fetch users' });
-    }
-  }
-
   async store(req: Request, res: Response) {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     try {
-      console.log(`Tentativa de criação de usuário para o email: ${email}`);
-      
-      const userExists = await prisma.user.findUnique({ where: { email } });
-
-      if (userExists) {
-        console.log(`Usuário já existe para o email: ${email}`);
-        return res.status(400).json({ error: "User already exists" });
+      if (!name || !email || !password || !role) {
+        return res.status(400).json({ error: 'Campos obrigatórios ausentes' });
       }
-
-      const hash_password = await hash(password, 8);
 
       const user = await prisma.user.create({
         data: {
           name,
           email,
-          password: hash_password,
+          password,
+          role, // Inclua a propriedade `role`
         },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        }
       });
 
-      console.log(`Usuário criado com sucesso: ${user.id}`);
-      return res.status(201).json({ user });
+      return res.status(201).json(user);
     } catch (error) {
-      console.error("Erro ao criar usuário:", error);
-      return res.status(500).json({ error: 'Failed to create user' });
+      console.error('Erro ao criar usuário:', error);
+      return res.status(500).json({ error: 'Erro ao criar usuário' });
+    }
+  }
+
+  async index(req: Request, res: Response) {
+    try {
+      const users = await prisma.user.findMany();
+      return res.status(200).json(users);
+    } catch (error) {
+      console.error('Erro ao listar usuários:', error);
+      return res.status(500).json({ error: 'Erro ao listar usuários' });
     }
   }
 }
