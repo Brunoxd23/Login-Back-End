@@ -12,44 +12,31 @@ const allowedOrigins = [
   'http://localhost:3000'
 ];
 
-const corsOptions: cors.CorsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    console.log('Requisição recebida de origem:', origin);
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('Origem não permitida:', origin);
-      callback(new Error('Not allowed by CORS'));
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
     }
+    return callback(null, true);
   },
   credentials: true,
   optionsSuccessStatus: 200
-};
+}));
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
-// Middleware para logs
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log('Origin:', req.headers.origin);
-  console.log('Headers:', JSON.stringify(req.headers, null, 2));
-  next();
-});
+// Handle preflight requests
+app.options('*', cors());
 
 app.use('/api', router);
 
-// Rota de teste
-app.get('/', (req, res) => {
-  res.json({ message: 'Backend is running' });
-});
-
 const PORT = process.env.PORT || 3000;
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 export default app;
