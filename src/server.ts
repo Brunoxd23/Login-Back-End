@@ -1,7 +1,7 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './middlewares/auth'; // Certifique-se de que o caminho está correto
+import { router } from './routes'; // Certifique-se de que este caminho está correto
 import { errorHandler } from './middlewares/errorHandle';
 
 dotenv.config();
@@ -39,7 +39,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/auth', authRoutes); // Certifique-se de que a rota está correta
+app.use('/api', router); // Verifique se o router está configurado corretamente
 
 // Rota de teste
 app.get('/', (req, res) => {
@@ -50,8 +50,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
