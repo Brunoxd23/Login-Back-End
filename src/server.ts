@@ -3,10 +3,20 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { router } from './routes'; // Certifique-se de que este caminho está correto
 import { errorHandler } from './middlewares/errorHandle';
+import { PrismaClient } from '@prisma/client'; // Importa o PrismaClient
 
 dotenv.config();
 
 const app = express();
+const prisma = new PrismaClient(); // Instancia o PrismaClient
+
+// Conecta ao banco de dados
+prisma.$connect()
+  .then(() => console.log('Conectado ao banco de dados!'))
+  .catch((error) => {
+    console.error('Erro ao conectar ao banco de dados:', error);
+    process.exit(1); // Encerra o processo em caso de erro
+  });
 
 const allowedOrigins = [
   'https://cronograma-provas-morato-frontend.vercel.app',
