@@ -7,25 +7,26 @@ export class AuthController {
   async authenticate(req: Request, res: Response) {
     const { email, password } = req.body;
 
+    console.log('Tentativa de autenticação:', email);
+
     try {
-      console.log(`Tentativa de autenticação para o email: ${email}`);
       const user = await prisma.user.findUnique({ where: { email } });
 
       if (!user) {
-        console.log(`Usuário não encontrado para o email: ${email}`);
+        console.log('Usuário não encontrado:', email);
         return res.status(400).json({ error: "User not found" });
       }
 
       const passwordMatch = await compare(password, user.password);
 
       if (!passwordMatch) {
-        console.log(`Senha inválida para o usuário: ${email}`);
+        console.log('Senha inválida:', email);
         return res.status(400).json({ error: "Invalid credentials" });
       }
 
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
-        console.error("JWT secret não configurado");
+        console.error('JWT secret não configurado');
         return res.status(500).json({ error: "JWT secret not configured" });
       }
 
@@ -33,10 +34,11 @@ export class AuthController {
         expiresIn: "1d",
       });
 
-      console.log(`Autenticação bem-sucedida para o usuário: ${email}`);
+      console.log('Autenticação bem-sucedida:', email);
+
       return res.json({ user: { id: user.id, email: user.email }, token });
     } catch (error) {
-      console.error("Erro durante a autenticação:", error);
+      console.error('Erro durante a autenticação:', error);
       return res.status(500).json({ error: "Failed to authenticate" });
     }
   }
