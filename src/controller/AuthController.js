@@ -8,26 +8,45 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const prisma_1 = require("../utils/prisma");
 const bcryptjs_1 = require("bcryptjs");
-const jsonwebtoken_1 = require("jsonwebtoken");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 class AuthController {
     authenticate(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { email, password } = req.body;
-            const user = yield prisma_1.prisma.user.findUnique({ where: { email } });
-            if (!user) {
-                return res.json({ error: "user not found" });
+            console.log('Tentativa de autenticação:', email);
+            try {
+                const user = yield prisma_1.prisma.user.findUnique({ where: { email } });
+                if (!user) {
+                    console.log('Usuário não encontrado:', email);
+                    return res.status(400).json({ error: "User not found" });
+                }
+                const passwordMatch = yield (0, bcryptjs_1.compare)(password, user.password);
+                if (!passwordMatch) {
+                    console.log('Senha inválida:', email);
+                    return res.status(400).json({ error: "Invalid credentials" });
+                }
+                const jwtSecret = process.env.JWT_SECRET;
+                if (!jwtSecret) {
+                    console.error('JWT secret não configurado');
+                    return res.status(500).json({ error: "JWT secret not configured" });
+                }
+                const token = jsonwebtoken_1.default.sign({ userId: user.id }, jwtSecret, {
+                    expiresIn: "1d",
+                });
+                console.log('Autenticação bem-sucedida:', email);
+                return res.json({ user: { id: user.id, email: user.email }, token });
             }
-            const isPasswordValid = yield (0, bcryptjs_1.compare)(password, user.password);
-            if (!isPasswordValid) {
-                return res.json({ error: "password invalid" });
+            catch (error) {
+                console.error('Erro durante a autenticação:', error);
+                return res.status(500).json({ error: "Failed to authenticate" });
             }
-            const token = (0, jsonwebtoken_1.sign)({ id: user.id }, "secret", { expiresIn: "1h" });
-            const { id } = user;
-            return res.json({ user: { id, email }, token });
         });
     }
 }
