@@ -17,29 +17,27 @@ const allowedOrigins = [
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     console.log('Requisição CORS recebida de origem:', origin);
-    // Permite requisições sem origem (como em ferramentas de teste ou servidores locais)
     if (!origin || allowedOrigins.includes(origin)) {
-      console.log('Origem permitida:', origin);
       callback(null, true);
     } else {
-      console.log('Origem não permitida:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Permite o envio de cookies e credenciais
-  optionsSuccessStatus: 200 // Para lidar com alguns navegadores antigos que tratam status 204 como erro
+  credentials: true, // Habilita envio de cookies e credenciais
+  optionsSuccessStatus: 200 // Para lidar com navegadores que tratam 204 como erro
 };
 
+// O CORS deve vir ANTES de qualquer rota
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Middleware para logs
+// Middleware de log (opcional)
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
   next();
 });
 
+// Suas rotas
 app.use('/api', router);
 
 // Rota de teste
