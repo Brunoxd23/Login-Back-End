@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 
 export class UserController {
   async store(req: Request, res: Response) {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     try {
-      if (!name || !email || !password || !role) {
+      if (!name || !email || !password) {
         return res.status(400).json({ error: 'Campos obrigatórios ausentes' });
       }
 
@@ -16,9 +16,8 @@ export class UserController {
         data: {
           name,
           email,
-          password,
-          role, // Inclua a propriedade `role`
-        },
+          password
+        }
       });
 
       return res.status(201).json(user);

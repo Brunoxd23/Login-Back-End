@@ -10,42 +10,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+const prisma_1 = require("../utils/prisma");
+const bcryptjs_1 = require("bcryptjs");
 class UserController {
-    store(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { name, email, password, role } = req.body;
-            try {
-                if (!name || !email || !password || !role) {
-                    return res.status(400).json({ error: 'Campos obrigatórios ausentes' });
-                }
-                const user = yield prisma.user.create({
-                    data: {
-                        name,
-                        email,
-                        password,
-                        role, // Inclua a propriedade `role`
-                    },
-                });
-                return res.status(201).json(user);
-            }
-            catch (error) {
-                console.error('Erro ao criar usuário:', error);
-                return res.status(500).json({ error: 'Erro ao criar usuário' });
-            }
-        });
-    }
     index(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const users = yield prisma.user.findMany();
-                return res.status(200).json(users);
+            const users = yield prisma_1.prisma.user.findMany();
+            return res.json(users);
+        });
+    }
+    store(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { name, email, password } = req.body;
+            const userExists = yield prisma_1.prisma.user.findUnique({ where: { email } });
+            if (userExists) {
+                return res.json({ error: "user exists" });
             }
-            catch (error) {
-                console.error('Erro ao listar usuários:', error);
-                return res.status(500).json({ error: 'Erro ao listar usuários' });
-            }
+            const hash_password = yield (0, bcryptjs_1.hash)(password, 8);
+            const user = yield prisma_1.prisma.user.create({
+                data: {
+                    name,
+                    email,
+                    password: hash_password
+                }
+            });
+            return res.json({ user });
         });
     }
 }

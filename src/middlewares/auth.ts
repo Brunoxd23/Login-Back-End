@@ -1,8 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
+import { hash, compare } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { UserWithRole } from '../@types/types'; // Ajuste o caminho conforme necessário
+import cors from 'cors';
 
+const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -10,27 +12,43 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET não está definido. Configure esta variável de ambiente.');
 }
 
-const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(' ')[1];
+// Configuração CORS
+const allowedOrigins = [
+  'https://cronograma-provas-morato-frontend.vercel.app',
+  'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app',
+  // Adicione aqui outras origens permitidas, se necessário
+];
 
-  if (!token) {
-    return res.status(401).json({ message: 'Token não fornecido' });
-  }
+router.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Endpoint de login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; email: string; role: string };
-    const user = await prisma.user.findUnique({ where: { id: decoded.id } }) as UserWithRole;
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) {
-      return res.status(401).json({ message: 'Usuário não encontrado' });
+    if (!user || !(await compare(password, user.password))) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    req.user = user; // Adiciona a propriedade user ao req
-    next();
-  } catch (error) {
-    console.error('Erro durante a autenticação:', error);
-    return res.status(401).json({ message: 'Token inválido' });
-  }
-};
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
 
-export default authMiddleware;
+    return res.json({ user, token });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to authenticate' });
+  }
+});
+
+export default router;

@@ -4,5 +4,4 @@ export interface UserWithRole {
   name: string;
   email: string;
   password: string;
-  role: string; // Adicione a propriedade role
 }
