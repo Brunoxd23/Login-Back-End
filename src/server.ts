@@ -32,7 +32,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Middleware de log (opcional)
-app.use((req, _res, next) => {
+app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
@@ -41,7 +41,7 @@ app.use((req, _res, next) => {
 app.use('/api', router);
 
 // Rota de teste
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   res.json({ message: 'Backend is running' });
 });
 
