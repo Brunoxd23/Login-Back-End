@@ -1,33 +1,23 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { router } from './routes'; // Certifique-se de que este caminho está correto
+import { router } from './routes';
 import { errorHandler } from './middlewares/errorHandle';
-import { PrismaClient } from '@prisma/client'; // Importa o PrismaClient
 
 dotenv.config();
 
 const app = express();
-const prisma = new PrismaClient(); // Instancia o PrismaClient
-
-// Conecta ao banco de dados
-prisma.$connect()
-  .then(() => console.log('Conectado ao banco de dados!'))
-  .catch((error) => {
-    console.error('Erro ao conectar ao banco de dados:', error);
-    process.exit(1); // Encerra o processo em caso de erro
-  });
 
 const allowedOrigins = [
   'https://cronograma-provas-morato-frontend.vercel.app',
-  'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app',
+  'https://cronograma-provas-morato-frontend-aa56cstb7.vercel.app',
   'http://localhost:3000'
 ];
 
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     console.log('Requisição CORS recebida de origem:', origin);
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       console.log('Origem permitida:', origin);
       callback(null, true);
     } else {
@@ -44,12 +34,12 @@ app.use(express.json());
 
 // Middleware para logs
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
   next();
 });
 
-app.use('/api', router); // Certifique-se de que o router está configurado corretamente
+app.use('/api', router);
 
 // Rota de teste
 app.get('/', (req, res) => {
