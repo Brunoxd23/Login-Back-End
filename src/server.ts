@@ -39,7 +39,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api', router); // Verifique se o router está configurado corretamente
+app.use('/api', router); // Certifique-se de que o router está configurado corretamente
 
 // Rota de teste
 app.get('/', (req, res) => {

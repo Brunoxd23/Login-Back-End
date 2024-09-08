@@ -1,10 +1,8 @@
-import { Router } from 'express';
-import { compare } from 'bcryptjs';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { UserWithRole } from '../@types/types'; // Ajuste o caminho conforme necessário
 
-const router = Router();
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -12,37 +10,27 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET não está definido. Configure esta variável de ambiente.');
 }
 
-// Endpoint de login
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers.authorization?.split(' ')[1];
 
-  console.log('Recebido email:', email);
-  console.log('Recebido senha:', password);
+  if (!token) {
+    return res.status(401).json({ message: 'Token não fornecido' });
+  }
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } }) as UserWithRole;
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: number; email: string; role: string };
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } }) as UserWithRole;
 
-    console.log('Usuário encontrado:', user);
-
-    if (!user || !(await compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      return res.status(401).json({ message: 'Usuário não encontrado' });
     }
 
-    console.log('Senha verificada, gerando token');
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    console.log('Token gerado:', token);
-
-    return res.json({ user, token });
+    req.user = user; // Adiciona a propriedade user ao req
+    next();
   } catch (error) {
     console.error('Erro durante a autenticação:', error);
-    return res.status(500).json({ error: 'Failed to authenticate' });
+    return res.status(401).json({ message: 'Token inválido' });
   }
-});
+};
 
-export default router;
+export default authMiddleware;

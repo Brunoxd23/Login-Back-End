@@ -1,13 +1,20 @@
-import { Router } from "express";
-import { UserController } from "./controller/UserController";
-import { AuthController } from "./controller/AuthController";
-import authMiddleware from "./middlewares/auth";
+import { Router } from 'express';
+import { UserController } from './controller/UserController';
+import { AuthController } from './controller/AuthController';
+import authMiddleware from './middlewares/auth';
+
+const router = Router();
 
 const userController = new UserController();
 const authController = new AuthController();
 
-export const router = Router();
+// Endpoint para autenticação
+router.post('/auth/login', (req, res) => authController.authenticate(req, res));
 
-router.post("/auth", (req, res) => authController.authenticate(req, res));
-router.post("/create", (req, res) => userController.store(req, res));
-router.get("/users", authMiddleware, (req, res) => userController.index(req, res));
+// Endpoint para criar um novo usuário
+router.post('/create', (req, res) => userController.store(req, res));
+
+// Endpoint protegido para listar usuários
+router.get('/users', authMiddleware, (req, res) => userController.index(req, res));
+
+export { router };
