@@ -3,6 +3,7 @@ import { hash, compare } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
+import { UserWithRole } from '../@types/types'; // Ajuste o caminho conforme necessário
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -37,13 +38,17 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } }) as UserWithRole;
 
     if (!user || !(await compare(password, user.password))) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role }, // Adicione 'role' aqui
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
     return res.json({ user, token });
   } catch (error) {

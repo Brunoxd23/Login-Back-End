@@ -1,58 +1,61 @@
-import express from 'express';
-import cors from 'cors';
+import express, { Request, Response, NextFunction } from 'express';
+import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
-import { router } from './routes';
-import { errorHandler } from './middlewares/errorHandle';
+import { router } from './routes'; // Assumindo que você tenha um arquivo de rotas
+import { errorHandler } from './middlewares/errorHandle'; // Middleware de tratamento de erros
 
 dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
+// Configuração de CORS
+const allowedOrigins: string[] = [
   'https://cronograma-provas-morato-frontend.vercel.app',
   'https://cronograma-provas-morato-frontend-aa56cstb7.vercel.app',
   'http://localhost:3000'
 ];
 
-const corsOptions: cors.CorsOptions = {
+const corsOptions: CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     console.log('Requisição CORS recebida de origem:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('Não permitido por CORS'));
     }
   },
-  credentials: true, // Habilita envio de cookies e credenciais
-  optionsSuccessStatus: 200 // Para lidar com navegadores que tratam 204 como erro
+  credentials: true, // Permite envio de credenciais como cookies ou headers de autenticação
+  optionsSuccessStatus: 200
 };
 
-// O CORS deve vir ANTES de qualquer rota
+// Middleware CORS para lidar com requisições
 app.use(cors(corsOptions));
+
+// Middleware para analisar JSON no corpo da requisição
 app.use(express.json());
 
-// Middleware de log (opcional)
-app.use((req, res, next) => {
+// Middleware para logs
+app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Suas rotas
-app.use('/api', router);
-
-// Rota de teste
-app.get('/', (req, res) => {
-  res.json({ message: 'Backend is running' });
+// Rota principal
+app.get('/', (req: Request, res: Response) => {
+  res.json({ message: 'Backend está funcionando' });
 });
 
+// Definindo rotas da API
+app.use('/api', router);
+
+// Tratando requisições preflight OPTIONS
+app.options('*', cors(corsOptions));
+
+// Middleware para tratamento de erros
 app.use(errorHandler);
 
+// Iniciando o servidor
 const PORT = process.env.PORT || 3000;
-
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-}
-
-export default app;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
