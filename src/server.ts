@@ -14,9 +14,11 @@ const allowedOrigins = [
 
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    console.log('Requisição recebida de origem:', origin);
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('Origem não permitida:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -28,14 +30,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Middleware para logs
-app.use((req, _res, next) => {
-  console.log(`${req.method} ${req.path}`);
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   console.log('Origin:', req.headers.origin);
-  console.log('Headers:', req.headers);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
   next();
 });
 
-app.use(router);
+app.use('/api', router);
 
 // Rota de teste
 app.get('/', (req, res) => {
