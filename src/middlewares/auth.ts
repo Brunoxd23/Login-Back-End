@@ -16,7 +16,6 @@ if (!JWT_SECRET) {
 const allowedOrigins = [
   'https://cronograma-provas-morato-frontend.vercel.app',
   'https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app',
-  'https://localhost:3000'
   // Adicione aqui outras origens permitidas, se necessário
 ];
 
