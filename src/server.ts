@@ -17,7 +17,7 @@ const allowedOrigins = [
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     console.log('Requisição CORS recebida de origem:', origin);
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin || allowedOrigins.includes(origin)) {
       console.log('Origem permitida:', origin);
       callback(null, true);
     } else {
@@ -34,8 +34,8 @@ app.use(express.json());
 
 // Middleware para logs
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+  console.log(`${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
   next();
 });
 
