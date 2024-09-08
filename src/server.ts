@@ -1,61 +1,58 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors, { CorsOptions } from 'cors';
+import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
-import { router } from './routes'; // Assumindo que você tenha um arquivo de rotas
-import { errorHandler } from './middlewares/errorHandle'; // Middleware de tratamento de erros
+import { router } from './routes';
+import { errorHandler } from './middlewares/errorHandle';
 
 dotenv.config();
 
 const app = express();
 
-// Configuração de CORS
-const allowedOrigins: string[] = [
+const allowedOrigins = [
   'https://cronograma-provas-morato-frontend.vercel.app',
   'https://cronograma-provas-morato-frontend-aa56cstb7.vercel.app',
   'http://localhost:3000'
 ];
 
-const corsOptions: CorsOptions = {
+const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     console.log('Requisição CORS recebida de origem:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Não permitido por CORS'));
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true, // Permite envio de credenciais como cookies ou headers de autenticação
-  optionsSuccessStatus: 200
+  credentials: true, // Habilita envio de cookies e credenciais
+  optionsSuccessStatus: 200 // Para lidar com navegadores que tratam 204 como erro
 };
 
-// Middleware CORS para lidar com requisições
+// O CORS deve vir ANTES de qualquer rota
 app.use(cors(corsOptions));
-
-// Middleware para analisar JSON no corpo da requisição
 app.use(express.json());
 
-// Middleware para logs
-app.use((req: Request, res: Response, next: NextFunction) => {
+// Middleware de log (opcional)
+app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Rota principal
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Backend está funcionando' });
-});
-
-// Definindo rotas da API
+// Suas rotas
 app.use('/api', router);
 
-// Tratando requisições preflight OPTIONS
-app.options('*', cors(corsOptions));
+// Rota de teste
+app.get('/', (req, res) => {
+  res.json({ message: 'Backend is running' });
+});
 
-// Middleware para tratamento de erros
 app.use(errorHandler);
 
-// Iniciando o servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
