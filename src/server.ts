@@ -11,17 +11,14 @@ const app = express();
 const allowedOrigins = [
   'https://cronograma-provas-morato-frontend.vercel.app',
   'https://cronograma-provas-morato-frontend-aa56cstb7.vercel.app',
-  'http://localhost:3000'
+  'http://localhost:3000' // Adicione outras origens permitidas, se necessário
 ];
 
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    console.log('Requisição CORS recebida de origem:', origin);
     if (!origin || allowedOrigins.includes(origin)) {
-      console.log('Origem permitida:', origin);
       callback(null, true);
     } else {
-      console.log('Origem não permitida:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -53,6 +50,11 @@ const PORT = process.env.PORT || 3000;
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+  });
+} else {
+  // Código específico para ambiente de produção, se necessário
+  app.listen(PORT, () => {
+    console.log(`Server is running on production environment on port ${PORT}`);
   });
 }
 
