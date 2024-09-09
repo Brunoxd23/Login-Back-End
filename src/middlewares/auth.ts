@@ -1,57 +1,32 @@
-import { Router } from "express";
-import { compare } from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-import cors from "cors";
+import { NextFunction, Request, Response } from "express";
+import { verify } from "jsonwebtoken";
 
-const router = Router();
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET;
+type TokenPayload = {
+  id: string;
+  iat: number;
+  exp: number;
+};
 
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET não está definido. Configure esta variável de ambiente.');
-}
+export function authMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { authorization } = req.headers;
 
-// Configuração CORS
-const allowedOrigins = [
-  "https://cronograma-provas-morato-frontend.vercel.app",
-  "https://cronograma-provas-morato-frontend-98vb5sr0f.vercel.app"
-  // Adicione aqui outras origens permitidas, se necessário
-];
+  if (!authorization) {
+    return res.status(401).json({ error: "Token not provided" });
+  }
 
-router.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        var msg =
-          "The CORS policy for this site does not allow access from the specified Origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
-
-// Endpoint de login
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const [, token] = authorization.split(" ");
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const decoded = verify(token, "secret");
+    const { id } = decoded as TokenPayload;
 
-    if (!user || !(await compare(password, user.password))) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1h" });
-
-    return res.json({ user, token });
+    req.userId = id;
+    next();
   } catch (error) {
-    return res.status(500).json({ error: "Failed to authenticate" });
+    return res.status(401).json({ error: "Token invalid" });
   }
-});
-
-export default router;
+}
