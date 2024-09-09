@@ -2,14 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.ts",
+      "src": "dist/server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/api/index.ts"
+      "dest": "dist/server.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://cronograma-provas-morato-frontend.vercel.app",
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+        "Access-Control-Allow-Credentials": "true"
+      }
     }
   ]
 }

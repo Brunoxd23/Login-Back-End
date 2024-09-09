@@ -1,6 +1,8 @@
-import { prisma } from "../utils/prisma";
-import { hash } from "bcryptjs";
 import { Request, Response } from "express";
+import { hash } from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class UserController {
   async index(req: Request, res: Response) {
