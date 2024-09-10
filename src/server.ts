@@ -1,41 +1,24 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { router } from "./routes";
+import dotenv from "dotenv";
 
+// Carrega variáveis de ambiente do arquivo .env
 dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  "https://cronograma-provas-morato-frontend.vercel.app",
-  "http://localhost:3000"
-];
+// Configura o middleware CORS para permitir solicitações de diferentes origens
+app.use(cors());
 
-const corsOptions: cors.CorsOptions = {
-  origin: function (
-    origin: string | undefined,
-    callback: (err: Error | null, allow?: boolean) => void
-  ) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-
-app.use(cors(corsOptions));
+// Configura o middleware para analisar o corpo das requisições em JSON
 app.use(express.json());
 
-app.use("/api", router);
+// Usa o roteador importado para gerenciar rotas
+app.use(router);
 
+// Obtém a porta a partir das variáveis de ambiente ou usa 3000 por padrão
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-export default app;
+// Inicia o servidor e escuta na porta especificada
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
