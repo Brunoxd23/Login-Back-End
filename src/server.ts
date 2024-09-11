@@ -2,36 +2,47 @@ import express from "express";
 import cors from "cors";
 import { router } from "./routes";
 import dotenv from "dotenv";
-import { errorHandler } from "./middlewares/errorHandle";
+
+console.log("Iniciando servidor...");
 
 dotenv.config();
+console.log("Variáveis de ambiente carregadas");
 
 const app = express();
+console.log("Instância do Express criada");
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://frontend-pied-kappa-64.vercel.app/"
-];
+// Log das variáveis de ambiente (não logue informações sensíveis em produção)
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN);
+console.log("PORT:", process.env.PORT);
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        var msg =
-          "The CORS policy for this site does not allow access from the specified Origin.";
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
+    origin: process.env.CORS_ORIGIN,
     credentials: true
   })
 );
+console.log("CORS configurado");
 
 app.use(express.json());
+console.log("Middleware express.json configurado");
+
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
 app.use(router);
-app.use(errorHandler);
+console.log("Rotas configuradas");
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+} else {
+  console.log(
+    "Configuração de produção: servidor pronto para lidar com requisições"
+  );
+}
+
+export default app;
