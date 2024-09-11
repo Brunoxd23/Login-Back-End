@@ -2,23 +2,36 @@ import express from "express";
 import cors from "cors";
 import { router } from "./routes";
 import dotenv from "dotenv";
+import { errorHandler } from "./middlewares/errorHandle";
 
-// Carrega variáveis de ambiente do arquivo .env
 dotenv.config();
 
 const app = express();
 
-// Configura o middleware CORS para permitir solicitações de diferentes origens
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://frontend-pied-kappa-64.vercel.app/"
+];
 
-// Configura o middleware para analisar o corpo das requisições em JSON
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        var msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true
+  })
+);
+
 app.use(express.json());
-
-// Usa o roteador importado para gerenciar rotas
 app.use(router);
+app.use(errorHandler);
 
-// Obtém a porta a partir das variáveis de ambiente ou usa 3000 por padrão
 const PORT = process.env.PORT || 3000;
 
-// Inicia o servidor e escuta na porta especificada
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

@@ -21,12 +21,13 @@ export function authMiddleware(
   const [, token] = authorization.split(" ");
 
   try {
-    const decoded = verify(token, "secret");
+    const decoded = verify(token, process.env.JWT_SECRET || "secret");
     const { id } = decoded as TokenPayload;
 
     req.userId = id;
     next();
   } catch (error) {
+    console.error("Token verification error:", error);
     return res.status(401).json({ error: "Token invalid" });
   }
 }
