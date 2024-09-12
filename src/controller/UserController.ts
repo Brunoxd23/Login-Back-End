@@ -11,23 +11,37 @@ export class UserController {
   }
   async store(req: Request, res: Response) {
     const { name, email, password } = req.body;
-
-    const userExists = await prisma.user.findUnique({ where: { email } });
-
-    if (userExists) {
-      return res.json({ error: "user exists" });
-    }
-
-    const hash_password = await hash(password, 8);
-
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hash_password
+  
+    try {
+      console.log(`Tentativa de criação de usuário para o email: ${email}`);
+      
+      const userExists = await prisma.user.findUnique({ where: { email } });
+  
+      if (userExists) {
+        console.log(`Usuário já existe para o email: ${email}`);
+        return res.status(400).json({ error: "User already exists" });
       }
-    });
-    user.password = "";
-    return res.json({ user });
-  }
-}
+  
+      const hash_password = await hash(password, 8);
+  
+      const user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          password: hash_password,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      });
+  
+      console.log(`Usuário criado com sucesso: ${user.id}`);
+      return res.status(201).json({ user });
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
+      return res.status(500).json({ error: 'Failed to create user' });
+    }
+ }
+ }
