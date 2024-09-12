@@ -13,6 +13,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+console.log("Middleware JSON configurado");
 
 // Middleware para logging
 app.use((req: Request, res: Response, next: NextFunction) => {
