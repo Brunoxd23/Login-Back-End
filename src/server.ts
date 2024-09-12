@@ -1,47 +1,30 @@
-import express, {
-  Request,
-  Response,
-  NextFunction,
-  ErrorRequestHandler
-} from "express";
-import cors from "cors";
-import { router } from "./routes";
-import dotenv from "dotenv";
+import express from 'express';
+import cors from 'cors';
+import { router } from './routes';
+import dotenv from 'dotenv';
 
-console.log("Iniciando servidor...");
-
+// Carregar variáveis de ambiente
 dotenv.config();
-console.log("Variáveis de ambiente:", process.env);
 
 const app = express();
 
-app.use(cors());
-console.log("CORS configurado");
-
-app.use(express.json());
-console.log("Middleware JSON configurado");
-
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log("Headers:", req.headers);
-  console.log("Body:", req.body);
-  next();
-});
-
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.error("Erro não tratado:", err);
-  res
-    .status(500)
-    .json({ error: "Erro interno do servidor", details: err.message });
+// Configurações do CORS
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || "https://frontend-pied-kappa-64.vercel.ap", // Permite acesso da URL do frontend
+    optionsSuccessStatus: 200
 };
 
-app.use(errorHandler);
+app.use(cors(corsOptions));
+app.use(express.json());
 
-app.use(router);
-console.log("Rotas configuradas");
+// Roteamento
+app.use("/api", router);
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
+// Configuração da porta
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () =>
+  console.log(`Server is running on http://localhost:${PORT}`)
+);
 
+// Exportar para uso em ambientes serverless
 export default app;
